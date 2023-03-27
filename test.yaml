@@ -1,0 +1,435 @@
+openapi: 3.0.0
+info:
+  title: Distributor API
+  version: 1.0.0
+  contact:
+    name: eBullion
+    url: eBullion.in
+    email: help@ebullion.in
+  description: Partner API Guide
+  license:
+    name: MIT
+    url: 'https://www.ebullion.in/terms-and-conditions/privacypolicy.html'
+  termsOfService: 'https://www.ebullion.in/terms-and-conditions/T&C.html'
+servers:
+  - url: 'http://dev-dist-api.ebullion.in'
+components:
+  securitySchemes:
+    API-Key:
+      name: API-key
+      type: apiKey
+      in: header
+      description: Pass the API-key provided to you by eBullion
+tags:
+  - name: Customer
+  - name: Account
+  - name: Quotation
+  - name: KYC
+  - name: Order
+paths:
+  '/customer/{customerId}':
+    get:
+      tags:
+        - Customer
+      summary: Get Customer Details By ID
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+        '401':
+          description: Unauthorized
+      description: Fetch customer details by customerId
+      operationId: 'getCustomer'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: {}
+    parameters:
+      - schema:
+          type: string
+        name: customerId
+        in: path
+        required: true
+  /account:
+    post:
+      tags:
+        - Account
+      summary: Create Account
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                customerId: '595447'
+                pinCode: '400050'
+                stateName: Maharashtra
+      parameters: []
+      operationId: 'createAccount'
+      responses:
+        '200':
+          description: OK
+          headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                data:
+                  customerId: '678506'
+                  accountId: EBACCX000490
+                  displayName: Nike
+                  active: ENABLED
+                  isPrimary: false
+                  createdBy: 0cef914e-67ab-4039-bb4c-6fe0c054124a
+                  updatedBy: 0cef914e-67ab-4039-bb4c-6fe0c054124a
+                  kyc: {}
+                  shippingAddress:
+                    addressId: 763
+                    addressType: HOME
+                    address1: ''
+                    address2: ''
+                    city: ''
+                    state: Maharashtra
+                    pinCode: '400050'
+                    countryCode: ''
+                    defaultAddress: true
+                    active: ENABLED
+                  billingAddress:
+                    addressId: 762
+                    addressType: HOME
+                    address1: ''
+                    address2: ''
+                    city: ''
+                    state: Maharashtra
+                    pinCode: '400050'
+                    countryCode: ''
+                    defaultAddress: true
+                    active: ENABLED
+        '400':
+          description: Bad Request
+          headers:
+            vary:
+              schema:
+                type: string
+                example: Origin
+            access-control-allow-origin:
+              schema:
+                type: string
+                example: '*'
+            content-type:
+              schema:
+                type: string
+                example: application/json; charset=utf-8
+            content-length:
+              schema:
+                type: integer
+                example: 97
+            Date:
+              schema:
+                type: string
+                example: 'Tue, 14 Feb 2023 04:13:27 GMT'
+            Connection:
+              schema:
+                type: string
+                example: keep-alive
+            Keep-Alive:
+              schema:
+                type: string
+                example: timeout=5
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                errors:
+                  - code: 400
+                    title: Maximum sub account limit is exceeded
+                    detail: ''
+                    source: {}
+      description: Create new account for customer
+  /customer/verify/upi:
+    post:
+      tags:
+        - Quotation
+      summary: UPI Verification
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                items:
+                  - itemCode: Pd00008
+                    uom: g
+                    requestedValue: 10000
+                    requestedType: AMOUNT
+                    otherItems: []
+                type: SELL
+                currency: INR
+                ebActRef: EBACCX000576
+      responses:
+        '200':
+          description: OK
+          headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                data:
+                  code: 400
+                  payload:
+                    unitPrice: 63.11
+                  sendSuccess: true
+                  title: Request Amount/Qty not found
+  /quote:
+    post:
+      tags:
+        - Quotation
+      summary: Generate quote
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                items:
+                  - itemCode: Ag0003
+                    uom: g
+                    requestedValue: 1
+                    requestedType: PRODUCT_QTY
+                    otherItems: []
+                type: BUYBACK
+                currency: INR
+                ebActRef: EBACCX000433
+      responses:
+        '200':
+          description: OK
+          headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                data:
+                  code: 500
+                  title: Insufficient metal balance
+                  detail: ''
+                  source: {}
+                  sendSuccess: true
+                  payload:
+                    unitPrice: 60.55
+        '201':
+          description: Created
+          headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                data:
+                  ebQuoteRef: eb-q-000184
+                  currency: INR
+                  quotedAt: '2022-01-26T07:33:17.634Z'
+                  quotedAtUnix: 1643182397634
+                  validUntil: '2022-01-26T07:34:17.634Z'
+                  validUntilUnix: 1643182457634
+                  accountId: EBACCX000011
+                  customerId: '510448'
+                  type: BUYBACK
+                  items:
+                    - itemCode: Ag0003
+                      requestedType: PRODUCT_QTY
+                      requestedValue: 10
+                      uom: g
+                      itemBreakDown:
+                        - itemCode: Ag0003
+                          name: Silver
+                          description: Sample Request
+                          hsnCode: '7106'
+                          uom: g
+                          qty: 10
+                          calculatedQty: 10
+                          discount: []
+                          taxes: []
+                          summary:
+                            adjustedQuantity: 0
+                            finalQuantity: 10
+                            unitPrice: 63.5
+                            lineDiscount: 0
+                            lineTaxAmount: 0
+                            lineAmount: 635
+                            lineNetAmount: 635
+                            lineTotal: 635
+                      summary:
+                        itemTotalTax: 0
+                        itemTotalDiscount: 0
+                        totalLineAmount: 635
+                        itemNetAmount: 635
+                        itemTotalAmount: 635
+                  invoiceTaxes: []
+                  customer:
+                    customerId: '510448'
+                    customerType: IND
+                    customerCategory: UNREGISTERED
+                    displayName: SUSHANT R
+                    kyc:
+                      pan: null
+                      gstin: null
+                    billingAddress:
+                      addressId: 17
+                      addressType: HOME
+                      address1: 'Flat No.-1602,tower H1, A T S Haciendas, Opp. Aditya Mall, Ghaziabad, Shipra Sun City, Ahinsa Khand Indirapuram, Uttar Pradesh, India, 201014'
+                      address2: ''
+                      city: Shipra Sun City
+                      pinCode: '201014'
+                      state: Uttar Pradesh
+                      countryCode: '+91'
+                      defaultAddress: true
+                      active: ENABLED
+                    shippingAddress:
+                      addressId: 18
+                      addressType: HOME
+                      address1: 'Flat No.-1602,tower H1, A T S Haciendas, Opp. Aditya Mall, Ghaziabad, Shipra Sun City, Ahinsa Khand Indirapuram, Uttar Pradesh, India, 201014'
+                      address2: ''
+                      city: Shipra Sun City
+                      pinCode: '201014'
+                      state: Uttar Pradesh
+                      countryCode: '+91'
+                      defaultAddress: true
+                      active: ENABLED
+                  summary:
+                    itemTotalTax: 0
+                    itemTotalDiscount: 0
+                    quotationTotalTax: 0
+                    quotationTotal: 635
+                    quotationTax: 0
+      description: Create new quote
+  /kyc/aadhar/otp:
+    post:
+      tags:
+        - KYC
+      summary: Aadhar OTP Send
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                aadhaarNo: '645118018300'
+                name: Niketa Solanki
+                consent: true
+                customerId: '527898'
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                data:
+                  kycId: 8f5487b9-ef77-4297-a08c-97d4519e0520
+  /kyc/aadhar/verify:
+    post:
+      tags:
+        - KYC
+      summary: Aadhar OTP Verify
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                aadhaarNo: 645118018300
+                kycId: 930e1375-23f5-46d4-b54a-7da5bc27d4de
+                otp: 953553
+                customerId: '527898'
+          application/xml:
+            schema:
+              type: object
+              properties: {}
+          multipart/form-data:
+            schema:
+              type: object
+              properties: {}
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                data:
+                  kycId: cc2df1b1-b628-4852-8568-8a0dff4ec78b
+                  name: Niketa Solanki
+                  maskedAadhaarNumber: XXXX XXXX 8300
+                  address:
+                    address1: 'A-9, Swapna Safalya, 25th road, Behind Duruelo Convent School, Andheri, Mumbai Suburban, Bandra, Bandra West, Maharashtra, India, 400050'
+                    address2: null
+                    pinCode: '400050'
+                    city: Bandra
+                    state: Maharashtra
+                    countryCode: '+91'
+  /kyc/pan/verify:
+    post:
+      tags:
+        - KYC
+      summary: PAN Verify
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                pan: DVHPM4941K
+                customerId: '527898'
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                data:
+                  success: true
+  /order:
+    post:
+      tags:
+        - Order
+      summary: Create Order
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                ebQuoteRef: eb-q-030698
+                paymentType: PARTNER_CREDIT
+      responses:
+        '200':
+          description: OK
+          headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+              examples: {}
+security:
+  - API-Key: []
